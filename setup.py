@@ -5,7 +5,7 @@ import sys  # noqa
 
 setup(
     name='yj-tool',
-    version='1.0',
+    version='1.1',
     description='A YAML to JSON convertor tool written in python.',
     author='Ankit Jain',
     license='Apache-2.0 License',

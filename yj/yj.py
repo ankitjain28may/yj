@@ -3,6 +3,12 @@ import sys
 import yaml
 from getopt import GetoptError, getopt
 
+
+def serialize_sets(obj):
+    if isinstance(obj, set):
+        return list(obj)
+    return obj
+
 class YJ:
     def __init__(self, arr):
         self.flatten_arr = {}
@@ -10,11 +16,30 @@ class YJ:
 
     def flatten(self, arr, pre=""):
         for i in arr:
+            # Flattening dict type
             if type(arr[i]) is dict:
-                pf = i
+                newPre = i
                 if pre != "":
-                    pf = pre + "." + i
-                self.flatten(arr[i], pf)
+                    newPre = pre + "." + i
+                self.flatten(arr[i], newPre)
+            # Flattening list type
+            elif type(arr[i]) is list:
+                # if list contains string values, append it directly as sets
+                if type(arr[i][0]) is str:
+                    getSet = set(arr[i])
+                    if pre != "":
+                        self.flatten_arr[pre + "." + i] = getSet
+                    else:
+                        self.flatten_arr[i] = getSet
+                    continue
+                newPre = i
+                if pre != "":
+                    newPre = pre + "." + i
+                # Ranging for all the objects|dicts inside the list
+                for j in range(len(arr[i])):
+                    newPref = newPre + "[" + str(j) + "]"
+                    self.flatten(arr[i][j], newPref)
+            # Appending direct strings
             else:
                 if pre != "":
                     self.flatten_arr[pre + "." + i] = arr[i]
@@ -74,7 +99,7 @@ def main():
     YJObj = YJ(yaml_list)
     final_list = YJObj.get_flatten_array()
     if prettyPrint:
-        print(json.dumps(final_list, indent=indent, sort_keys=False))
+        print(json.dumps(final_list, indent=indent, sort_keys=False, default=serialize_sets))
     else:
         print(final_list)
 
